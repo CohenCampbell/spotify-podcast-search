@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <form>
+        <h1>Login</h1>
+        {% for field in form if field.widget.input_type != 'hidden'%}
+        <p>{{field.label}} {{field}}</p>
+        {%endfor%}
+        <button type="submit">Login</button>
+        {%for msg in get_flashed_messages()%}
+        <p>{{msg}}</p>
+        {%endfor%}
+        <h5>Are you new here? <a href="/register">Register</a> for free!</h5>
+    </form>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <form>
+        <h1> Register </h1>
+        {{form.csrf_token}}
+        {% for field in form if field.widget.input_type != 'hidden'%}
+        <p>{{field.label}} {{field}}</p>
+        {%endfor%}
+        <button type="submit">Sumbit</button>
+        {%for msg in get_flashed_messages()%}
+        <p>{{msg}}</p>
+        {%endfor%}
+        <h5>Already a member? <a href="/login">Login</a></h5>
+    </form>
+</body>
+</html>
