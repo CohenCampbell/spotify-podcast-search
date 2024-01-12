@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+</head>
+<body>
+    <nav><a href="/logout"><button>Logout</button></a></nav>
+    <h1>Welcome</h1>
+    <p>
+            This is a tool used to search a specified Spotify podcast for specific guests, topics, or episodes.
+        The tool works by first searching for and selecting a podcast, then using a keyword, it looks through the 
+        descriptions and titles of all the episodes for the selected podcast and returns the matching results.
+        To start, click the button below and find the podcast you'd like to search through, then once selected,
+        input a keyword and all episodes with matching results will be displayed
+    </p>
+    <a href="/podcast"><button>Select a podcast!</button></a>
+    {%for msg in get_flashed_messages()%}
+        <p>{{msg}}</p>
+        {%endfor%}
+    {%if admin%}
+    <hr>
+    <p>
+        Add a new podcast to the list as an Admin! You'll need the podcast id from spotify to do this.
+    </p>
+    <a href="/podcastAPI"><button>Add a new podcast!</button></a>
+    {%endif%}
+</body>
+</html>

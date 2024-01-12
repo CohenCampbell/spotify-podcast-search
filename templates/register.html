@@ -6,7 +6,7 @@
     <title>Register</title>
 </head>
 <body>
-    <form>
+    <form action="/register" method="post">
         <h1> Register </h1>
         {{form.csrf_token}}
         {% for field in form if field.widget.input_type != 'hidden'%}

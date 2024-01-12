@@ -6,7 +6,7 @@
     <title>Login</title>
 </head>
 <body>
-    <form>
+    <form action="/login" method="post">
         <h1>Login</h1>
         {% for field in form if field.widget.input_type != 'hidden'%}
         <p>{{field.label}} {{field}}</p>

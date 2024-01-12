@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PodcastAPI</title>
+</head>
+<body>
+    <nav><a href="/"><button>Back</button></a></nav>
+    <p>Please input the podcast ID from spotify.</p>
+    <form action="/podcastAPI" method="post">
+        {{form.csrf_token}}
+        {{form.code(value=code)}}
+        {% for field in form if field.widget.input_type != 'hidden'%}
+        <p>{{field}}</p>
+        {%endfor%}
+        <button type="submit">Search!</button>
+        {%for msg in get_flashed_messages()%}
+        <p>{{msg}}</p>
+        {%endfor%}
+    </form>
+    <hr>
+    {%if podcast%}
+    <div>
+        <form action="/podcast" method="post">
+            {{data_form.csrf_token}}
+            {{data_form.title(value= podcast.name)}}
+            {{data_form.host(value= podcast.host)}}
+            {{data_form.description(value= podcast.description)}}
+            {{data_form.img_url(value= podcast.image_url)}}
+            {{data_form.podcast_id_spotify(value= podcast.podcast_id)}}
+            {%for field in data_form if field.widget.input_type != 'hidden'%}
+            {{field}}
+            {%endfor%}
+            <img src={{podcast.image_url}} width="100" height="100">
+            <h4>{{podcast.name}}</h4> 
+            <h5>hosted by {{podcast.host}}</h5>
+            <p>{{podcast.description}}</p>
+            <button type="submit">Add to database!</button>
+        </form>
+    </div>
+    
+    {%endif%}
+</body>
+</html>
