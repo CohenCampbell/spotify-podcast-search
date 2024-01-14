@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{podcast.title}}</title>
+</head>
+<body>
+    <nav>
+        <a href="/podcast"><button>All Podcasts</button></a>
+        {%if podcast.id in watchlist_ids%}
+        <form action="/watchlist/remove/{{podcast.id}}" method="post"><button>Remove from watch list</button></form>
+        {%else%}
+        <form action="/watchlist/{{podcast.id}}" method="post"><button>Add to watch list</button></form>
+        {%endif%}
+    </nav>
+    <div>
+        <img src={{podcast.img_url}} width="150" height="150">
+        <h1>{{podcast.title}}</h1>
+        <h3>hosted by {{podcast.host}}</h3>
+        <p>{{podcast.description}}</p> 
+    </div>
+    <hr>
+    <div>
+        <h3>Enter your keyword here!</h3>
+
+    </div>
+</body>
+</html>

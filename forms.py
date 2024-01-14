@@ -16,7 +16,6 @@ class LoginFrom(FlaskForm):
 
 class SpotifyPodcastSearchForm(FlaskForm):
     search = StringField("Search", validators=[Length(min=1)])
-    code = HiddenField("Code")
 
 class SpotifyPodcastInfoForm(FlaskForm):
     host= HiddenField("host")

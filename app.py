@@ -63,13 +63,14 @@ def homepage():
     # getting spotify code, needed for spotify token, assigned None if it's not in query str
     if request.args:
         code = request.args["code"]
+        session["code"] = code
     else:
     # Gets code if it wasn't in query str
         return redirect(f"https://accounts.spotify.com/en/authorize?response_type=code&redirect_uri={redirect_uri}&client_id={client_id}")
     
     user = User.get_by_id(session["user_id"])
 
-    return render_template("/homepage.html", code=code or None, admin=user.admin)
+    return render_template("/homepage.html", admin=user.admin)
 
 @app.route("/register", methods=["GET"])
 def get_register():
@@ -132,7 +133,7 @@ def podcast_post():
 
     if(form.validate_on_submit()):
         query = form.search.data.replace(" ", "+")
-        code = form.code.data
+        code = session["code"]
     else:
         flash("There was an error with your search. Please try again!")
         return redirect("/podcast")
@@ -180,10 +181,10 @@ def show_podcast_db():
     if "user_id" not in session:
         flash("You must be logged in to view that page!")
         return redirect("/login")
-    
+    user = User.get_by_id(session["user_id"])
     podcasts = Podcast.query.all();
 
-    return render_template("/podcast.html", podcasts=podcasts)
+    return render_template("/podcast.html", podcasts=podcasts, admin=user.admin, user=user)
 
 @app.route("/podcast", methods=["POST"])
 def podcast_add_db():
@@ -197,5 +198,71 @@ def podcast_add_db():
         flash(f"{form.title.data} was added to the database!")
         return redirect("/podcastAPI")
     return redirect("/podcastAPI")
+
+@app.route("/podcast/<int:id>", methods=["GET"])
+def podcastID_get(id):
+
+    if "user_id" not in session:
+        flash("You must be logged in to view that page!")
+        return redirect("/login")
     
+    podcast = Podcast.get_by_id(id)
+    watchlist = WatchList.get_watchlist(user_id=session["user_id"])
+    watchlist_ids = [];
+    for item in watchlist:
+        watchlist_ids.append(item.podcast_id)
+   
+    return render_template("/podcastID.html", podcast=podcast, watchlist_ids=watchlist_ids)
     
+@app.route("/podcast/remove/<int:id>", methods=["POST"])
+def podcastID_post(id):
+
+    if session["admin"] != True:
+        flash("You must be an admin to view that page!")
+        return redirect("/")
+    
+    Podcast.delete_podcast(id)
+    db.session.commit()
+
+    return redirect("/podcast")
+
+@app.route("/watchlist/<int:podcast_id>", methods=["POST"])
+def watchlist_post(podcast_id):
+
+    if "user_id" not in session:
+        flash("You must be logged in to view that page!")
+        return redirect("/login")
+
+    new_item = WatchList.add_item(user_id=session["user_id"], podcast_id=podcast_id)
+    db.session.commit()
+
+    return redirect(f"/podcast/{podcast_id}")
+
+@app.route("/watchlist/<int:id>", methods=["GET"])
+def watchlist_get(id):
+    
+    if "user_id" not in session:
+        flash("You must be logged in to view that page!")
+        return redirect("/login")
+    elif session["user_id"] != id:
+        return redirect(f"/watchlist/{session['user_id']}")
+        
+    user = User.get_by_id(id)
+    watchlist = WatchList.get_watchlist(id)
+    podcasts = []
+    for item in watchlist:
+        podcasts.append(Podcast.get_by_id(item.podcast_id))
+    return render_template("/watchlist.html", watchlist=watchlist, user=user, podcasts=podcasts)
+
+@app.route("/watchlist/remove/<int:podcast_id>", methods=["POST"])
+def watchlist_delete(podcast_id):
+
+    if "user_id" not in session:
+        flash("You must be logged in to view that page!")
+        return redirect("/login")
+    
+    WatchList.remove_item(session["user_id"], podcast_id)
+    db.session.commit()
+
+    return redirect("/podcast")
+     

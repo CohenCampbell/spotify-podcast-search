@@ -54,8 +54,18 @@ class Podcast(db.Model):
     def add_podcast(cls, host, title, description, img_url, podcast_id_spotify):
         new_podcast = cls(host=host, title=title, description=description, img_url=img_url, 
                           podcast_id_spotify=podcast_id_spotify)
+        
         db.session.add(new_podcast)
         return new_podcast
+
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.query.filter(cls.id == id).first()
+
+    @classmethod
+    def delete_podcast(cls, id):
+        delete_podcast = cls.get_by_id(id)
+        return db.session.delete(delete_podcast)
 
     id = db.Column(db.Integer,
                    primary_key=True,
@@ -76,15 +86,29 @@ class Podcast(db.Model):
     podcast_id_spotify = db.Column(db.String,
                            nullable=False)
 
+    watchlist = db.relationship("WatchList", cascade="all,delete", backref="podcasts")
+
 class WatchList(db.Model):
     __tablename__ = "watch_lists"
+
+    @classmethod
+    def add_item(cls, user_id, podcast_id):
+        new_item = cls(user_id=user_id, podcast_id=podcast_id)
+        db.session.add(new_item)
+        return new_item
+    
+    @classmethod
+    def get_watchlist(cls, user_id):
+        return cls.query.filter(cls.user_id == user_id).all()
+
+    @classmethod
+    def remove_item(cls, user_id, podcast_id):
+        delete_item = cls.query.filter(cls.user_id == user_id and cls.podcast_id == podcast_id).first()
+        return db.session.delete(delete_item)    
 
     id = db.Column(db.Integer,
                    primary_key=True,
                    autoincrement=True)
-    
-    title = db.Column(db.String,
-                      nullable=False)
     
     user_id = db.Column(db.Integer,
                         db.ForeignKey('users.id'),
@@ -96,7 +120,4 @@ class WatchList(db.Model):
     
     user = db.relationship("User",
                            backref="watch_lists")
-    
-    podcast = db.relationship("Podcast",
-                              backref="watch_lists")
     

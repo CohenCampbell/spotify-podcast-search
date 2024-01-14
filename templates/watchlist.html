@@ -3,22 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Podcast</title>
+    <title>{{user.username}}'s watchlist</title>
 </head>
 <body>
     <nav>
-        <a href="/"><button>Back</button></a>
-        <a href="watchlist/{{user.id}}"><button>Watchlist</button></a>
+        <a href="/podcast"><button>Back</button></a>
     </nav>
+    <h1>{{user.username}}'s watchlist</h1>
     {%for podcast in podcasts%}
     <div>
         <img src={{podcast.img_url}} width="65" height="65">
         <h4>{{podcast.title}}</h4> 
         <h5>hosted by {{podcast.host}}</h5>
         <a href="/podcast/{{podcast.id}}"><button>View</button></a>
-        {%if admin%}
-        <form action="/podcast/remove/{{podcast.id}}" method="post"><button>Delete</button></form>
-        {%endif%}
     </div>
     {%endfor%}
 </body>

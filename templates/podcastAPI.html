@@ -10,7 +10,6 @@
     <p>Please input the podcast ID from spotify.</p>
     <form action="/podcastAPI" method="post">
         {{form.csrf_token}}
-        {{form.code(value=code)}}
         {% for field in form if field.widget.input_type != 'hidden'%}
         <p>{{field}}</p>
         {%endfor%}
