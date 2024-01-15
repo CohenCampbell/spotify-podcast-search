@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, request, flash, session
 from requests import post, get
 from models import db, connect_db, User, Podcast, WatchList
-from forms import RegisterFrom, LoginFrom, SpotifyPodcastSearchForm, SpotifyPodcastInfoForm
+from forms import RegisterFrom, LoginFrom, SpotifyPodcastSearchForm, SpotifyPodcastInfoForm, KeywordForm
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 import os, base64, json
@@ -138,7 +138,7 @@ def podcast_post():
         flash("There was an error with your search. Please try again!")
         return redirect("/podcast")
 
-    url = f"https://api.spotify.com/v1/shows/{query}"                           #f'https://api.spotify.com/v1/search?q={query}&type=show&limit=5'
+    url = f"https://api.spotify.com/v1/shows/{query}"
     token = get_spofigy_token(code)
     headers = {'Authorization': 'Bearer ' + token}
     
@@ -206,13 +206,14 @@ def podcastID_get(id):
         flash("You must be logged in to view that page!")
         return redirect("/login")
     
+    form = KeywordForm()
     podcast = Podcast.get_by_id(id)
     watchlist = WatchList.get_watchlist(user_id=session["user_id"])
     watchlist_ids = [];
     for item in watchlist:
         watchlist_ids.append(item.podcast_id)
-   
-    return render_template("/podcastID.html", podcast=podcast, watchlist_ids=watchlist_ids)
+
+    return render_template("/podcastID.html", podcast=podcast, watchlist_ids=watchlist_ids, form=form)
     
 @app.route("/podcast/remove/<int:id>", methods=["POST"])
 def podcastID_post(id):
@@ -265,4 +266,34 @@ def watchlist_delete(podcast_id):
     db.session.commit()
 
     return redirect("/podcast")
+
+@app.route("/search/<int:podcast_id>", methods=["POST"])
+def search_episode(podcast_id):
+    form = KeywordForm()
+    keyword = form.keyword.data
+    podcast = Podcast.get_by_id(podcast_id)
+    user = User.get_by_id(session["user_id"])
+    offset = form.offset.data or 0
+    episodes= []
+    watchlist = WatchList.get_watchlist(user_id=session["user_id"])
+    watchlist_ids = [];
+    
+    for item in watchlist:
+        watchlist_ids.append(item.podcast_id)
+
+    url = f"https://api.spotify.com/v1/shows/{podcast.podcast_id_spotify}/episodes?limit=50&offset={offset}"                           #f'https://api.spotify.com/v1/search?q={query}&type=show&limit=5'
+    token = get_spofigy_token(session["code"])
+    headers = {'Authorization': 'Bearer ' + token}
+    
+    results = get(url, headers=headers)
+    results_json = json.loads(results.content)
+    if "items" not in results_json:
+            flash("The offset was too high")
+            return redirect(f"/podcast/{podcast_id}")
+    for episode in results_json["items"]:
+        if keyword in episode["description"]:
+            episodes.append(episode["name"])
+        
+    return render_template("/podcastID.html", podcast=podcast, form=form,
+                               watchlist_ids=watchlist_ids, episodes=episodes)
      

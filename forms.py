@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, EmailField, HiddenField
+from wtforms import StringField, PasswordField, EmailField, HiddenField, IntegerField
 from wtforms.validators import Length, InputRequired
 
 class RegisterFrom(FlaskForm):
@@ -16,6 +16,10 @@ class LoginFrom(FlaskForm):
 
 class SpotifyPodcastSearchForm(FlaskForm):
     search = StringField("Search", validators=[Length(min=1)])
+
+class KeywordForm(FlaskForm):
+    keyword = StringField("Keyword", validators=[Length(min=1)])
+    offset = IntegerField("Episode Offset")
 
 class SpotifyPodcastInfoForm(FlaskForm):
     host= HiddenField("host")
