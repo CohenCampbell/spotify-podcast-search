@@ -27,6 +27,16 @@ class User(db.Model):
     @classmethod
     def get_by_username(cls, username):
         return cls.query.filter(cls.username == username).first()
+    
+    @classmethod
+    def make_admin_by_id(cls, id):
+        user = cls.get_by_id(id)
+        if(user):
+            user.admin = True
+            db.session.commit()
+            return user
+        else:
+            return None
 
     id = db.Column(db.Integer,
                    primary_key=True,

@@ -1,26 +1,28 @@
 from flask import Flask, render_template, redirect, request, flash, session
 from requests import post, get
 from models import db, connect_db, User, Podcast, WatchList
-from forms import RegisterFrom, LoginFrom, SpotifyPodcastSearchForm, SpotifyPodcastInfoForm, KeywordForm
+from forms import RegisterForm, LoginForm, SpotifyPodcastSearchForm, SpotifyPodcastInfoForm, KeywordForm
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 import os, base64, json
 
+load_dotenv()
 app = Flask(__name__)
-app.secret_key = "SUN"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///spotify_app'
+
+app.secret_key = os.getenv("SECRET_KEY")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI_TEST")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 
 connect_db(app)
 bcrypt = Bcrypt()
-load_dotenv()
+
 client_id = os.getenv("CLIENT_ID")
 client_secret = os.getenv("CLIENT_SECRET")
 redirect_uri = "http://127.0.0.1:5000/"
 
 
-def get_spofigy_token(code):
+def get_spotify_token(code):
     
     auth_string = client_id + ":" + client_secret
     auth_string64 = base64.b64encode(auth_string.encode()).decode()
@@ -38,6 +40,7 @@ def get_spofigy_token(code):
     result = post(url, headers=headers, data=data)
     
     token = json.loads(result.content)
+    print(token["access_token"])
     return token["access_token"]
 
 
@@ -69,19 +72,21 @@ def homepage():
         return redirect(f"https://accounts.spotify.com/en/authorize?response_type=code&redirect_uri={redirect_uri}&client_id={client_id}")
     
     user = User.get_by_id(session["user_id"])
+    if(user == None):
+        return redirect("/register")
 
     return render_template("/homepage.html", admin=user.admin)
 
 @app.route("/register", methods=["GET"])
 def get_register():
 
-    form = RegisterFrom()
+    form = RegisterForm()
     return render_template("register.html", form=form)
 
 @app.route("/register", methods=["POST"])
 def post_register():
 
-    form = RegisterFrom()
+    form = RegisterForm()
     if(form.validate_on_submit()):
         username = form.username.data
         password = form.password.data
@@ -89,7 +94,7 @@ def post_register():
         
         new_user = User.register(username, password, email)
         db.session.commit()
-
+        
         session["user_id"] = new_user.id
         session["admin"] = new_user.admin
         return redirect("/")
@@ -99,13 +104,13 @@ def post_register():
 @app.route("/login", methods=["GET"])
 def get_login():
 
-    form = LoginFrom()
+    form = LoginForm()
     return render_template("login.html", form=form)
 
 @app.route("/login", methods=["POST"])
 def post_login():
 
-    form = LoginFrom()
+    form = LoginForm()
     username = form.username.data
     password = form.password.data
 
@@ -136,10 +141,10 @@ def podcast_post():
         code = session["code"]
     else:
         flash("There was an error with your search. Please try again!")
-        return redirect("/podcast")
+        return redirect("/podcastAPI")
 
     url = f"https://api.spotify.com/v1/shows/{query}"
-    token = get_spofigy_token(code)
+    token = get_spotify_token(code)
     headers = {'Authorization': 'Bearer ' + token}
     
     results = get(url, headers=headers)
@@ -282,7 +287,7 @@ def search_episode(podcast_id):
         watchlist_ids.append(item.podcast_id)
 
     url = f"https://api.spotify.com/v1/shows/{podcast.podcast_id_spotify}/episodes?limit=50&offset={offset}"                           #f'https://api.spotify.com/v1/search?q={query}&type=show&limit=5'
-    token = get_spofigy_token(session["code"])
+    token = get_spotify_token(session["code"])
     headers = {'Authorization': 'Bearer ' + token}
     
     results = get(url, headers=headers)
@@ -293,6 +298,8 @@ def search_episode(podcast_id):
     for episode in results_json["items"]:
         if keyword in episode["description"]:
             episodes.append(episode["name"])
+    if(len(episodes) == 0):
+        flash(f"No episodes were found using the word {keyword}!")
         
     return render_template("/podcastID.html", podcast=podcast, form=form,
                                watchlist_ids=watchlist_ids, episodes=episodes)
