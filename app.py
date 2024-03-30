@@ -3,22 +3,21 @@ from requests import post, get
 from models import db, connect_db, User, Podcast, WatchList
 from forms import RegisterForm, LoginForm, SpotifyPodcastSearchForm, SpotifyPodcastInfoForm, KeywordForm
 from flask_bcrypt import Bcrypt
-from dotenv import load_dotenv
 import os, base64, json
 
-load_dotenv()
+
 app = Flask(__name__)
 
-app.secret_key = os.getenv("SECRET_KEY")
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI_TEST")
+app.secret_key = os.environ.get("SECRET_KEY")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI_TEST")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 
 connect_db(app)
 bcrypt = Bcrypt()
 
-client_id = os.getenv("CLIENT_ID")
-client_secret = os.getenv("CLIENT_SECRET")
+client_id = os.environ.get("CLIENT_ID")
+client_secret = os.environ.get("CLIENT_SECRET")
 redirect_uri = "http://127.0.0.1:5000/"
 
 
