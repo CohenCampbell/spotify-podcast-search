@@ -18,7 +18,7 @@ bcrypt = Bcrypt()
 
 client_id = os.environ.get("CLIENT_ID")
 client_secret = os.environ.get("CLIENT_SECRET")
-redirect_uri = "http://127.0.0.1:5000/"
+redirect_uri = "http://127.0.0.1:10000/"
 
 
 def get_spotify_token(code):
