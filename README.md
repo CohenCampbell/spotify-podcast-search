@@ -8,9 +8,9 @@ SQLAlchemy, Jinja, RESTful APIs, JavaScript, HTML, and CSS.
 
 ## How To Use 
 
-You can either create a copy of the app, which ls a little difficult due to the Spotify API, or go to [my website](https://www.lipsum.com/) and use the app from there. If you'd like setup your own app, please refer to the [Spotify API documentation](https://developer.spotify.com/documentation/web-api) to better understand how the API requests are working, and refer to the environment variables near the bottom of the readme.  
+If you'd like setup your own app, please refer to the [Spotify API documentation](https://developer.spotify.com/documentation/web-api) to better understand how the API requests are working, and refer to the environment variables near the bottom of the readme.  
 
-### To use the app from [my website](https://www.lipsum.com/)
+### To use the app once it's running
 
 1. Register for an account
 2. Select one of the podcast from the list
